@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>imgur Upload API</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
+    <script type="text/javascript" src="../src/jquery.Jcrop.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="../src/jquery.Jcrop.min.css" type="text/css" />
+    <link href="../src/imgur.css" rel="stylesheet" media="screen">
+    <style>
+        .jumbotron h1, .jumbotron p {
+            padding-left: 60px;
+            padding-right: 60px;
+        }
+
+        .col-md {
+            margin: 0 auto;
+            max-width: 500px
+        }
+    </style>
+</head>
+<body>
+
+      <!-- Button trigger modal -->
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+      Launch demo modal
+    </button>
+
+    <div id="imgicon" style="position: relative; background-image: url(http://i.imgur.com/n4VDs0h.jpg); width: 100px; height: 100px;">
+      <div id="editbtn" data-toggle="modal" data-target="#myModal" align="right" style="cursor: pointer; display:none; position: absolute; background-color: rgba(52, 152, 219, 0.6); height: 26px; width: 100px; bottom: 0">
+        <span class="glyphicon glyphicon-pencil" style="color: white; margin-right: 5px; margin-top: 5px;" style=""></span>
+      </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+          </div>
+          <div class="modal-body">
+            <div class="col-md">
+              <div class="drop_container">
+                <div class="dropzone"></div>
+              </div>
+              <div class="modal_container" style="display: none; ">
+                <img src="./svg/loading-spin.svg" style="display:block;margin:auto"/>
+              </div>
+              <div class="result_container">
+                <img id="preview" />
+                <div class="error"></div>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript" src="../src/crop.js"></script>
+    <script type="text/javascript" src="../src/imgur.js"></script>
+    <script type="text/javascript">
+        var feedback = function (res) {
+            if (res.success === true) {
+                // document.querySelector('.status').classList.add('bg-success');
+                // document.querySelector('.status').innerHTML = 'Image url: ' + res.data.link;
+                // document.querySelector('.status').innerHTML += '<br><img src="'+res.data.link+'" />';
+                document.querySelector('.result_container').classList.add('bg-success');
+                document.querySelector('.result_container').innerHTML = 'Image url: ' + res.data.link;
+                document.querySelector('.result_container').innerHTML += '<br><img src="'+res.data.link+'" />';
+            }
+        };
+
+        new Imgur({
+            clientid: 'xxxxxxx',
+            callback: feedback
+        });
+
+        $("#imgicon").mouseover(function(){
+          $("#editbtn").stop().slideDown();
+        }).mouseleave(function(){
+          $("#editbtn").stop().slideUp();
+        });
+    </script>
+</body>
+</html>
