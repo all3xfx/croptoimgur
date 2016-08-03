@@ -8,7 +8,7 @@ function resetModal() {
 
 function sendImage() {
   // Insert loading spin
-  $('#imgicon').css("background-image", "url(svg/loading-spin.svg)");
+  $('#imgicon').css("background-image", "url(src/svg/loading-spin.svg)");
   // preview element
   var oImage = document.getElementById('preview');
   var img = new Image();

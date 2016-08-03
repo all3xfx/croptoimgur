@@ -6,10 +6,10 @@
     <link href="https://netdna.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" media="screen">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
     <script src="https://code.jquery.com/jquery-3.1.0.min.js"></script>
-    <script type="text/javascript" src="../src/jquery.Jcrop.js"></script>
+    <script type="text/javascript" src="src/jquery.Jcrop.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="../src/jquery.Jcrop.min.css" type="text/css" />
-    <link href="../src/imgur.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="src/jquery.Jcrop.min.css" type="text/css" />
+    <link href="src/imgur.css" rel="stylesheet" media="screen">
     <style>
         .jumbotron h1, .jumbotron p {
             padding-left: 60px;
@@ -34,6 +34,9 @@
       </div>
     </div>
     <div class="result"></div>
+
+    <br><br>
+    Thanks to <a href="http://deepliquid.com/content/Jcrop.html">Jcrop</a>, <a href="https://github.com/pinceladasdaweb/imgur">pinceladasdaweb Imgur</a>, <a href="https://www.script-tutorials.com/html5-image-uploader-with-jcrop/"> Script-Tutorials</a>
 
     <!-- Modal -->
     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -63,8 +66,8 @@
 
 </center>
 
-    <script type="text/javascript" src="../src/crop.js"></script>
-    <script type="text/javascript" src="../src/imgur.js"></script>
+    <script type="text/javascript" src="src/crop.js"></script>
+    <script type="text/javascript" src="src/imgur.js"></script>
     <script type="text/javascript">
         var feedback = function (res) {
             if (res.success === true) {
@@ -74,7 +77,7 @@
         };
 
         var imgur = new Imgur({
-            clientid: 'ed4bdea12608019',
+            clientid: 'xxxxxxxxxxxxxx',
             callback: feedback
         });
 
