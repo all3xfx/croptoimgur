@@ -1,25 +1,32 @@
-function getCropped() {
+function resetModal() {
+  $('.drop_container').css('display', '');
+  $('.result_container').css('display', 'none');
+  $('#saveBtn').addClass('disabled');
+  $('#saveBtn').prop('disabled', true);
+  imgur.clearStatus();
+}
+
+function sendImage() {
+  // Insert loading spin
+  $('#imgicon').css("background-image", "url(svg/loading-spin.svg)");
   // preview element
   var oImage = document.getElementById('preview');
   var img = new Image();
   img.src = oImage.src;
-  console.log(crop);
-
 
   img.onload = function(){
   var canvas = $('<canvas/>')
       .attr({
-           width: 250,
-           height: 250
+           width: xsize,
+           height: ysize
        })
       .hide()
       .appendTo('body'),
       ctx = canvas.get(0).getContext('2d'),
-      a = $('<a download="cropped-image" title="click to download the image" />'),
       cropCoords = {
           topLeft : {
-              x : crop.x1,
-              y : crop.y1
+              x : crop.x,
+              y : crop.y
           },
           bottomRight :{
               x : crop.w,
@@ -27,23 +34,15 @@ function getCropped() {
           }
       };
 
-  ctx.drawImage(img, cropCoords.topLeft.x, cropCoords.topLeft.y, cropCoords.bottomRight.x, cropCoords.bottomRight.y, 0, 0, 250, 250);
+  ctx.drawImage(img, cropCoords.topLeft.x, cropCoords.topLeft.y, cropCoords.bottomRight.x, cropCoords.bottomRight.y, 0, 0, xsize, ysize);
   var base64ImageData = canvas.get(0).toDataURL();
 
-
-  a
-      .attr('href', base64ImageData)
-      .text('cropped image')
-      .appendTo('body');
-
-  a
-      .clone()
-      .attr('href', img.src)
-      .text('original image')
-      .attr('download','original-image')
-      .appendTo('body');
-
+  // Append cropped image to Form and send to ImgUr
   canvas.remove();
+  var fd = new FormData();
+  var blob = dataURLtoBlob(base64ImageData);
+  fd.append('image', blob);
+  imgur.send(fd);
   };
 }
 
@@ -52,7 +51,7 @@ var jcrop_api,
     boundx,
     boundy,
     crop = {},
-    xsize = ysize = 250;
+    xsize = ysize = 100;
 
 function fileSelectHandler(fd) {
 
@@ -60,19 +59,17 @@ function fileSelectHandler(fd) {
     //var oFile = $('#image_file')[0].files[0];
     var oFile = fd;
 
-    // hide all errors
-    $('.error').hide();
-
     // check for image type (jpg and png are allowed)
     var rFilter = /^(image\/jpeg|image\/png)$/i;
     if (! rFilter.test(oFile.type)) {
-        $('.error').html('Please select a valid image file (jpg and png are allowed)').show();
+        imgur.showError('Please select a valid image file');
+        //$('.error').html('Please select a valid image file (jpg and png are allowed)').show();
         return;
     }
 
     // check for file size
     if (oFile.size > 250 * 1024) {
-        $('.error').html('You have selected too big file, please select a one smaller image file').show();
+        imgur.showError('You have selected too big file, please select a one smaller image file');
         return;
     }
 
@@ -91,55 +88,72 @@ function fileSelectHandler(fd) {
 
         oImage.onload = function () { // onload event handler
 
-            // display step 2
-            $('.step2').fadeIn(500);
+            if(this.width > 500 || this.height > 500)
+            {
+              imgur.showError('Image dimensions should be smalle than 500x500');
+              return;
+            }else{
+              // destroy Jcrop if it is existed
+              if (typeof jcrop_api != 'undefined') {
+                  jcrop_api.destroy();
+                  jcrop_api = null;
+                  $('#preview').width(oImage.naturalWidth);
+                  $('#preview').height(oImage.naturalHeight);
+              }
 
-            // destroy Jcrop if it is existed
-            if (typeof jcrop_api != 'undefined') {
-                jcrop_api.destroy();
-                jcrop_api = null;
-                $('#preview').width(oImage.naturalWidth);
-                $('#preview').height(oImage.naturalHeight);
+              //setTimeout(function(){
+                  var sizeMax = Math.max(oImage.naturalWidth, oImage.naturalHeight);
+                  // initialize Jcrop
+                  $('#preview').Jcrop({
+                      minSize: [32, 32], // min crop size
+                      aspectRatio: xsize / ysize, // keep aspect ratio 1:1
+                      setSelect: [0, 0, sizeMax, sizeMax],
+                      allowSelect: false,
+                      bgFade: true, // use fade effect
+                      bgOpacity: .3, // fade opacity
+                      onChange: updatePreview,
+                      onSelect: updatePreview
+                  }, function(){
+
+                      // use the Jcrop API to get the real image size
+                      var bounds = this.getBounds();
+                      boundx = bounds[0];
+                      boundy = bounds[1];
+
+                      // Store the Jcrop API in the jcrop_api variable
+                      jcrop_api = this;
+
+                      // Hide drop container and show result container
+                      $('.drop_container').css('display', 'none');
+                      $('.result_container').css('display', '');
+
+                      // Allow save button
+                      $('#saveBtn').removeClass('disabled');
+                      $('#saveBtn').prop('disabled', false);
+                  });
             }
-
-            //setTimeout(function(){
-                var sizeMax = Math.max(oImage.naturalWidth, oImage.naturalHeight);
-                // initialize Jcrop
-                $('#preview').Jcrop({
-                    minSize: [32, 32], // min crop size
-                    aspectRatio: xsize / ysize, // keep aspect ratio 1:1
-                    setSelect: [0, 0, sizeMax, sizeMax],
-                    allowSelect: false,
-                    bgFade: true, // use fade effect
-                    bgOpacity: .3, // fade opacity
-                    onChange: updatePreview,
-                    onSelect: updatePreview
-                }, function(){
-
-                    // use the Jcrop API to get the real image size
-                    var bounds = this.getBounds();
-                    boundx = bounds[0];
-                    boundy = bounds[1];
-
-                    // Store the Jcrop API in the jcrop_api variable
-                    jcrop_api = this;
-                });
-            //},3000);
-
         };
 
     };
 
     // read selected file as DataURL
     oReader.readAsDataURL(oFile);
+
 }
 
 function updatePreview(c)
 {
   if (parseInt(c.w) > 0)
   {
-    //var rx = xsize / c.w;
-    //var ry = ysize / c.h;
-    crop.x1 = c.x; crop.x2 = c.x2; crop.y1 = c.y, crop.y2 = c.y2; crop.w = c.w, crop.h = c.h;
+    crop.x = c.x; crop.y = c.y, crop.w = c.w, crop.h = c.h;
   }
 };
+
+function dataURLtoBlob(dataurl) {
+    var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}

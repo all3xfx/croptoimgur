@@ -48,6 +48,17 @@
         insertAfter: function (referenceNode, newNode) {
             referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
         },
+        showError: function(message) {
+          var status = document.querySelector('.dropzone').nextSibling;
+          status.classList.remove('bg-success');
+          status.classList.add('bg-danger');
+          status.innerHTML = message;
+        },
+        clearStatus: function() {
+          var status = document.querySelector('.dropzone').nextSibling;
+          status.classList.remove('bg-success', 'bg-danger');
+          status.innerHTML = '';
+        },
         post: function (path, data, callback) {
             var xhttp = new XMLHttpRequest();
 
@@ -74,7 +85,7 @@
         createDragZone: function () {
             var p, input;
 
-            p     = this.createEls('p', {}, 'Drag your files here or click in this area.');
+            p     = this.createEls('p', {}, 'Drag your image here or click in this area.');
             input = this.createEls('input', {type: 'file', accept: 'image/*'});
 
             Array.prototype.forEach.call(this.dropzone, function (zone) {
@@ -109,9 +120,6 @@
                 var fd = new FormData();
                 fd.append('image', file);
 
-                $('.drop_container').css('display', 'none');
-                $('.modal_container').css('display', 'inline');
-
                 fileSelectHandler(file);
 
                 // this.post(this.endpoint, fd, function (data) {
@@ -119,10 +127,14 @@
                 //     typeof this.callback === 'function' && this.callback.call(this, data);
                 // }.bind(this));
             } else {
-                status.classList.remove('bg-success');
-                status.classList.add('bg-danger');
-                status.innerHTML = 'Invalid archive';
+                this.showError('Please select a valid image file');
             }
+        },
+        send: function(fd) {
+          this.post(this.endpoint, fd, function (data) {
+              document.body.classList.remove('busy');
+              typeof this.callback === 'function' && this.callback.call(this, data);
+          }.bind(this));
         },
         upload: function (zone) {
             var events = ['dragenter', 'dragleave', 'dragover', 'drop'],
